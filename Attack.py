@@ -42,15 +42,14 @@ hamming_weight_8bit_table = [
 
 class Attack:
 
-    def __init__(self, traces, plaintexts, number_of_traces=200, trace_size=370_000, offset=45000, end_offset=330_000):
+    def __init__(self, traces, plaintexts, number_of_traces=200, trace_size=370_000, offset=40000, segment_len=50000):
         self.traces = np.array(traces)
         self.plaintexts = np.array(plaintexts)
 
         self.number_of_traces = number_of_traces  # number of traces
         self.trace_size = trace_size  # number of samples in each trace
         self.offset = offset  # beginning of encryption process in power trace
-        self.end_offset = end_offset  # ending of encryption process in power trace
-        self.segment_len = (end_offset - offset) // 10  # length of power trace
+        self.segment_len = segment_len  # length of one round of power trace
 
         self.columns = 16  # each plaintext is 16-bytes
         self.rows = number_of_traces  # there are 200 plaintexts, hence 200 rows
@@ -83,7 +82,7 @@ class Attack:
                 zero = np.mean(zeros, axis=0)
                 candidates.append(one - zero)
 
-            res.append(np.argmax(candidates))
+            res.append(np.argmax(np.sum(candidates, axis=1)))
 
         print(res)
 
