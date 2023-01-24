@@ -57,30 +57,31 @@ class Attack:
     def attack(self):
         res = []
         for byte in range(16):  # the key is 16 bytes, at each step we try to break one byte of the key
-            ones = []
-            zeros = []
-            candidates = []
+            candidates = np.array([]).reshape(0, self.segment_len)
 
             print('byte =', byte+1)
             # power_hypothesis = np.zeros((self.number_of_traces, 256))
 
             for k in range(256):  # each byte of the key has 256 possibilities
+                ones = np.array([]).reshape(0, self.segment_len)
+                zeros = np.array([]).reshape(0, self.segment_len)
+
                 print('    key =', k+1)
                 for i in range(self.number_of_traces):
-                    trace = self.traces[i][self.offset:self.offset+self.segment_len]
+                    trace = self.traces[i][self.offset:self.offset+self.segment_len].reshape(1, self.segment_len)
                     xor = self.plaintexts[i][byte] ^ k
                     s_val = s_box[xor]
                     # hamming_weight = hamming_weight_8bit_table[s_val]
                     # power_hypothesis[i][k] = hamming_weight
 
                     if str(bin(s_val))[-1] == '1':
-                        ones.append(trace)
+                        ones = np.vstack([ones, trace])
                     else:
-                        zeros.append(trace)
+                        zeros = np.vstack([zeros, trace])
 
                 one = np.mean(ones, axis=0)
                 zero = np.mean(zeros, axis=0)
-                candidates.append(one - zero)
+                candidates = np.vstack([candidates, one - zero])
 
             res.append(np.argmax(np.sum(candidates, axis=1)))
 
