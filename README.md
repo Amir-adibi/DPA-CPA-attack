@@ -1,9 +1,9 @@
-# DPA-attack
+# DPA-CPA-attack
 
 This code is part of a university project.
 
-it performs DPA attack on the given power traces and plaintexts.
+It performs a simple DPA and CPA attack on AES algorithm using the given power traces and plaintexts.
 
-The accuracy is 12/16 on "known_key dataset".
+When performing DPA attack, the accuracy is 12/16 on the "known_key" dataset.
 
 You can find the dataset here: https://github.com/GaPhil/dpa
