@@ -13,13 +13,14 @@ class AccessData:
         file = open(self.trace_path, "rb")
         content = file.readline()  # whole data is represented in a single line
         file.close()
+
         return content
 
     def __preprocess_traces(self):
         content = self.__read_traces()
         traces = []
 
-        # since while data is in a single line, we need to separate each trace
+        # since whole data is in a single line, we need to separate each trace
         # number of traces = len(content) / self.number_of_samples = self.number_of_traces
         for i in range(0, len(content), self.number_of_samples):
             temp = []
@@ -101,4 +102,12 @@ class AccessData:
             data.append(temp_data)
 
         return data
+
+    @staticmethod
+    def save_key(path, data):
+        with open(path, 'w') as f:
+            for num in data:
+                f.write("%s, " % num)
+
+        print('Extracted key has been successfully written into the .txt file.')
 

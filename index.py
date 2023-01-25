@@ -13,7 +13,7 @@ if not os.listdir(data_directory):  # data_directory is empty
 traces, plaintexts = data.get_data()
 
 # plotting
-plt = Plot(traces, False)
+plt = Plot(traces, True)
 plt.plot()
 
 # attacking

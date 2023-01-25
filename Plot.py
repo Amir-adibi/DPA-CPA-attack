@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from load_data import *
 
 class Plot:
 
@@ -30,10 +29,5 @@ class Plot:
             x3 = np.arange(self.end_offset-800, self.end_offset)
             ax3 = fig.add_subplot(4, 1, 3)
             ax3.plot(x3, y3)
-
-            y4 = y1[40_000:90_000]
-            x4 = np.arange(40_000, 90_000)
-            ax4 = fig.add_subplot(4, 1, 4)
-            ax4.plot(x4, y4)
 
             plt.show()

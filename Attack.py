@@ -1,5 +1,7 @@
 # First S-box
 import numpy as np
+from AccessData import *
+from Plot import *
 
 s_box = [
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -40,52 +42,56 @@ hamming_weight_8bit_table = [
     4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
 ]
 
+
 class Attack:
 
-    def __init__(self, traces, plaintexts, number_of_traces=200, trace_size=370_000, offset=40000, segment_len=50000):
+    def __init__(self, traces, plaintexts, offset=45000, end_offset = 330_000):
         self.traces = np.array(traces)
         self.plaintexts = np.array(plaintexts)
 
-        self.number_of_traces = number_of_traces  # number of traces
-        self.trace_size = trace_size  # number of samples in each trace
+        self.number_of_traces = self.traces.shape[0]  # number of traces
+        self.trace_size = self.traces.shape[1]  # number of samples in each trace
+
         self.offset = offset  # beginning of encryption process in power trace
-        self.segment_len = segment_len  # length of one round of power trace
+        self.end_offset = end_offset
+        self.segment_len = (end_offset - offset) // 10  # length of one round of power trace
 
         self.columns = 16  # each plaintext is 16-bytes
-        self.rows = number_of_traces  # there are 200 plaintexts, hence 200 rows
+        self.rows = self.traces.shape[0]  # there are 200 plaintexts, hence 200 rows
 
     def attack(self):
         res = []
         for byte in range(16):  # the key is 16 bytes, at each step we try to break one byte of the key
-            candidates = np.array([]).reshape(0, self.segment_len)
-
-            print('byte =', byte+1)
-            # power_hypothesis = np.zeros((self.number_of_traces, 256))
+            candidates = []
 
             for k in range(256):  # each byte of the key has 256 possibilities
-                ones = np.array([]).reshape(0, self.segment_len)
-                zeros = np.array([]).reshape(0, self.segment_len)
+                ones = np.array([0]*self.segment_len)
+                zeros = np.array([0]*self.segment_len)
 
-                print('    key =', k+1)
+                count_ones = 0
+                count_zeros = 0
+
+                print('byte =', byte+1, ', key =', k+1)
                 for i in range(self.number_of_traces):
-                    trace = self.traces[i][self.offset:self.offset+self.segment_len].reshape(1, self.segment_len)
+                    trace = self.traces[i][self.offset:self.offset + self.segment_len].reshape(1, self.segment_len)
                     xor = self.plaintexts[i][byte] ^ k
                     s_val = s_box[xor]
-                    # hamming_weight = hamming_weight_8bit_table[s_val]
-                    # power_hypothesis[i][k] = hamming_weight
 
                     if str(bin(s_val))[-1] == '1':
-                        ones = np.vstack([ones, trace])
+                        ones = ones + trace
+                        count_ones += 1
                     else:
-                        zeros = np.vstack([zeros, trace])
+                        zeros = zeros + trace
+                        count_zeros += 1
 
-                one = np.mean(ones, axis=0)
-                zero = np.mean(zeros, axis=0)
-                candidates = np.vstack([candidates, one - zero])
+                delta = abs(ones/count_ones - zeros/count_zeros)
+                candidates.append(np.max(delta))
+            candidates = np.array(candidates)
+            res.append(np.argmax(candidates))
 
-            res.append(np.argmax(np.sum(candidates, axis=1)))
+        key = []
+        for i in res:
+            print(format(i, '08b'))
+            key.append(format(i, '08b'))
 
-        print(res)
-
-
-
+        AccessData().save_key('key.txt', key)
