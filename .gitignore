@@ -5,9 +5,3 @@ __pycache__/
 .idea/
 test/
 .DS_Store
-test.py
-load_data.py
-read_data.py
-plot2.py
-readPlaintext.py
-attack2.py

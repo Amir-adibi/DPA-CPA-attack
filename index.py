@@ -13,10 +13,10 @@ if not os.listdir(data_directory):  # data_directory is empty
 traces, plaintexts = data.get_data()
 
 # plotting
-plt = Plot(traces, True)
+plt = Plot(traces, False)
 plt.plot()
 
 # attacking
 atck = Attack(traces, plaintexts)
-atck.attack()
+atck.cpa_attack()
 
